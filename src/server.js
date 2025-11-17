@@ -16,11 +16,9 @@ app.use(cors());
 app.use(express.json());
 
 // ===== Content-Security-Policy (CSP) =====
-// ===== CSP =====
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    // autorise tout depuis ton domaine + data: pour images inline
     "default-src 'self'; " +
     "connect-src *; " +
     "img-src 'self' https://backend-foodapp.onrender.com data:; " +
@@ -31,9 +29,7 @@ app.use((req, res, next) => {
   next();
 });
 
-
 // ===== Dossier uploads =====
-// Serve static uploads
 const uploadsPath = path.join(__dirname, '..', 'uploads');
 app.use("/uploads", express.static(uploadsPath));
 
@@ -45,7 +41,10 @@ if (!fs.existsSync(uploadDir)) {
 }
 
 // ===== Favicon =====
-app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
+const faviconPath = path.join(__dirname, 'public', 'favicon.ico');
+if (fs.existsSync(faviconPath)) {
+  app.use('/favicon.ico', express.static(faviconPath));
+}
 
 // ===== Routes =====
 app.use('/api/auth', authRoutes);
@@ -53,7 +52,7 @@ app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/menus', menusRoutes);
 
-// Route de test
+// ===== Route de test =====
 app.get('/test', (req, res) => res.json({ message: '✅ Backend FoodApp fonctionne!' }));
 
 // ===== SOCKET.IO =====

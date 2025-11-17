@@ -6,53 +6,55 @@ const fs = require('fs');
 
 const authRoutes = require('./routes/auth');
 const restaurantRoutes = require('./routes/restaurants');
-const OrderRoutes = require('./routes/orders');
+const orderRoutes = require('./routes/orders');
 const menusRoutes = require("./routes/menus");
 
 const app = express();
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
+// ===== Middlewares =====
+app.use(cors()); // Autorise toutes les requêtes cross-origin
+app.use(express.json()); // Parse JSON body
 
-// CSP
+// ===== CSP adapté =====
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; connect-src *; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    "default-src 'self'; connect-src *; img-src * data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self';"
   );
   next();
 });
 
-// Dossier uploads
-app.use("/uploads", express.static(path.join(__dirname, '..', 'uploads')));
-const uploadDir = path.join(__dirname, '..', 'uploads', 'menus');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
+// ===== Gestion des uploads =====
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
 
+const menusDir = path.join(uploadsDir, 'menus');
+if (!fs.existsSync(menusDir)) fs.mkdirSync(menusDir, { recursive: true });
+
+app.use("/uploads", express.static(uploadsDir));
+
+// Favicon
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
-// Routes
+// ===== Routes API =====
 app.use('/api/auth', authRoutes);
 app.use('/api/restaurants', restaurantRoutes);
-app.use('/api/orders', OrderRoutes);
+app.use('/api/orders', orderRoutes);
 app.use('/api/menus', menusRoutes);
 
-app.get('/test', (req, res) => res.json({ message: 'Backend OK!' }));
+// Route de test rapide
+app.get('/test', (req, res) => res.json({ message: '✅ Backend FoodApp fonctionne!' }));
 
-// SOCKET.io
+// ===== SOCKET.IO =====
 const http = require("http");
 const { Server } = require("socket.io");
 
-const PORT = process.env.PORT || 4000; // IMPORTANT POUR RENDER
+const PORT = process.env.PORT || 4000;
 
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
+  cors: { origin: "*" },
 });
 
 io.on("connection", (socket) => {
@@ -63,9 +65,10 @@ io.on("connection", (socket) => {
   });
 });
 
+// Rendre Socket.IO accessible dans les routes
 app.set("socketio", io);
 
-// Start
+// ===== Démarrage serveur =====
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 Serveur + WebSocket lancé sur le port ${PORT}`);
 });

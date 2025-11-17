@@ -16,13 +16,21 @@ app.use(cors());
 app.use(express.json());
 
 // ===== Content-Security-Policy (CSP) =====
+// ===== CSP =====
 app.use((req, res, next) => {
   res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; connect-src *; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    "Content-Security-Policy",
+    // autorise tout depuis ton domaine + data: pour images inline
+    "default-src 'self'; " +
+    "connect-src *; " +
+    "img-src 'self' https://backend-foodapp.onrender.com data:; " +
+    "script-src 'self'; " +
+    "style-src 'self' 'unsafe-inline'; " +
+    "font-src 'self';"
   );
   next();
 });
+
 
 // ===== Dossier uploads =====
 // Serve static uploads

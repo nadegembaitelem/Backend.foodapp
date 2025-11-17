@@ -15,36 +15,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ===== CSP (Content-Security-Policy) =====
-// Autorise :
-// - default-src 'self' → tout ce qui n’est pas précisé vient de ton serveur
-// - connect-src * → toutes les requêtes XHR/Fetch/WebSocket
-// - img-src 'self' data: → images locales + base64
-// - style-src 'self' 'unsafe-inline' → styles inline
-// - script-src 'self' → scripts locaux uniquement
+// ===== Content-Security-Policy (CSP) =====
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; connect-src *; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    "default-src 'self'; connect-src *; img-src 'self' data: https:; script-src 'self'; style-src 'self' 'unsafe-inline'"
   );
   next();
 });
 
 // ===== Dossier uploads =====
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-const menusDir = path.join(uploadsDir, 'menus');
+// Serve static uploads
+const uploadsPath = path.join(__dirname, '..', 'uploads');
+app.use("/uploads", express.static(uploadsPath));
 
-// Crée les dossiers si nécessaire
-if (!fs.existsSync(menusDir)) {
-  fs.mkdirSync(menusDir, { recursive: true });
+// Crée le dossier menus si nécessaire
+const uploadDir = path.join(uploadsPath, 'menus');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
   console.log("✅ Dossier uploads/menus créé");
 }
 
-// Sert les fichiers statiques des uploads
-app.use("/uploads", express.static(uploadsDir));
-
 // ===== Favicon =====
-// Place ton favicon dans ./public/favicon.ico
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
 // ===== Routes =====
@@ -61,13 +53,10 @@ const http = require("http");
 const { Server } = require("socket.io");
 
 const PORT = process.env.PORT || 4000;
-
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
+  cors: { origin: "*" },
 });
 
 io.on("connection", (socket) => {

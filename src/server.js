@@ -19,7 +19,8 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.setHeader(
     "Content-Security-Policy",
-    "default-src 'self'; " +
+    // default-src autorise ton domaine + self
+    "default-src 'self' https://backend-foodapp.onrender.com; " +
     "connect-src *; " +
     "img-src 'self' https://backend-foodapp.onrender.com data:; " +
     "script-src 'self'; " +

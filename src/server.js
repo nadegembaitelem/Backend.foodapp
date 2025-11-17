@@ -12,37 +12,48 @@ const menusRoutes = require("./routes/menus");
 const app = express();
 
 // ===== Middlewares =====
-app.use(cors()); // Autorise toutes les requêtes cross-origin
-app.use(express.json()); // Parse JSON body
+app.use(cors());
+app.use(express.json());
 
-// ===== CSP adapté =====
+// ===== CSP (Content-Security-Policy) =====
+// Autorise :
+// - default-src 'self' → tout ce qui n’est pas précisé vient de ton serveur
+// - connect-src * → toutes les requêtes XHR/Fetch/WebSocket
+// - img-src 'self' data: → images locales + base64
+// - style-src 'self' 'unsafe-inline' → styles inline
+// - script-src 'self' → scripts locaux uniquement
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; connect-src *; img-src * data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self';"
+    "default-src 'self'; connect-src *; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'"
   );
   next();
 });
 
-// ===== Gestion des uploads =====
+// ===== Dossier uploads =====
 const uploadsDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
 const menusDir = path.join(uploadsDir, 'menus');
-if (!fs.existsSync(menusDir)) fs.mkdirSync(menusDir, { recursive: true });
 
+// Crée les dossiers si nécessaire
+if (!fs.existsSync(menusDir)) {
+  fs.mkdirSync(menusDir, { recursive: true });
+  console.log("✅ Dossier uploads/menus créé");
+}
+
+// Sert les fichiers statiques des uploads
 app.use("/uploads", express.static(uploadsDir));
 
-// Favicon
+// ===== Favicon =====
+// Place ton favicon dans ./public/favicon.ico
 app.use('/favicon.ico', express.static(path.join(__dirname, 'public', 'favicon.ico')));
 
-// ===== Routes API =====
+// ===== Routes =====
 app.use('/api/auth', authRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/menus', menusRoutes);
 
-// Route de test rapide
+// Route de test
 app.get('/test', (req, res) => res.json({ message: '✅ Backend FoodApp fonctionne!' }));
 
 // ===== SOCKET.IO =====
@@ -54,7 +65,9 @@ const PORT = process.env.PORT || 4000;
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*" },
+  cors: {
+    origin: "*",
+  },
 });
 
 io.on("connection", (socket) => {
@@ -65,7 +78,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// Rendre Socket.IO accessible dans les routes
+// Permet d'utiliser io dans les routes
 app.set("socketio", io);
 
 // ===== Démarrage serveur =====

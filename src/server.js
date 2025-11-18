@@ -9,6 +9,9 @@ const restaurantRoutes = require('./routes/restaurants');
 const orderRoutes = require('./routes/orders');
 const menusRoutes = require("./routes/menus");
 
+// Import sequelize instance pour health-check DB
+const sequelize = require("./db");
+
 const app = express();
 
 // ===== Middlewares =====
@@ -58,6 +61,18 @@ app.use('/api/menus', menusRoutes);
 
 // ===== Route de test =====
 app.get('/test', (req, res) => res.json({ message: '✅ Backend FoodApp fonctionne!' }));
+
+// ===== Health check =====
+// Renvoie l'état du service et vérifie la connexion à la DB
+app.get('/health', async (req, res) => {
+  try {
+    await sequelize.authenticate();
+    return res.json({ ok: true, db: true });
+  } catch (err) {
+    console.error('[HEALTH] DB check failed:', err && err.stack ? err.stack : err);
+    return res.status(500).json({ ok: false, db: false, error: err?.message || String(err) });
+  }
+});
 
 // ===== SOCKET.IO =====
 const http = require("http");

@@ -1,10 +1,19 @@
 const config = require("./config");
 const { Sequelize } = require("sequelize");
+const path = require("path");
+const fs = require("fs");
 
 let sequelize;
 
 // Supporter une URL de connexion complète via DATABASE_URL (utile pour certains providers)
-if (process.env.DATABASE_URL) {
+// Si USE_SQLITE=1 est défini, utilise une base SQLite file (pratique pour démo/deploy rapide)
+if (process.env.USE_SQLITE === "1") {
+  const dataDir = path.join(__dirname, '..', 'data');
+  if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+  const storage = path.join(dataDir, 'database.sqlite');
+  console.log('ℹ️  USE_SQLITE=1 détecté — utilisation de SQLite en fichier:', storage);
+  sequelize = new Sequelize({ dialect: 'sqlite', storage, logging: false });
+} else if (process.env.DATABASE_URL) {
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: "mariadb",
     logging: false,

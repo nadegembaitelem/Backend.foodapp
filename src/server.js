@@ -16,17 +16,20 @@ app.use(cors());
 app.use(express.json());
 
 // ===== Content-Security-Policy (CSP) =====
+// On autorise ici les ressources depuis self et tout hôte HTTPS pour les images
+// (utile pour déploiement sur Render et pour les URLs d'assets renvoyées par le backend).
 app.use((req, res, next) => {
-  res.setHeader(
-    "Content-Security-Policy",
-    // default-src autorise ton domaine + self
-    "default-src 'self' https://backend-foodapp.onrender.com; " +
-    "connect-src *; " +
-    "img-src 'self' https://backend-foodapp.onrender.com data:; " +
-    "script-src 'self'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "font-src 'self';"
-  );
+  // Par sécurité, on limite les scripts/styles à 'self' mais autorise les images depuis HTTPS et data: URIs
+  const csp = [
+    "default-src 'self' https:",
+    "connect-src *",
+    "img-src 'self' https: data: blob:",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' https: data:",
+  ].join('; ');
+
+  res.setHeader('Content-Security-Policy', csp);
   next();
 });
 

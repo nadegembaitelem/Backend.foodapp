@@ -46,5 +46,7 @@ sequelize
       console.log(`💡 DB host: ${config.db.host}, DB port: ${config.db.port || "(default)"}, DB name: ${config.db.database}`);
     } catch (e) {}
   });
+  console.log("USE_SQLITE =", process.env.USE_SQLITE);
+
 
 module.exports = sequelize;

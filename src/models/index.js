@@ -20,6 +20,8 @@ Order.belongsTo(Menu, { foreignKey: "menuId", as: "menu" });
 User.hasMany(Order, { foreignKey: "userId", as: "orders" });
 Order.belongsTo(User, { foreignKey: "userId", as: "user" });
 
+sequelize.sync();
+
 module.exports = {
   sequelize,
   User,

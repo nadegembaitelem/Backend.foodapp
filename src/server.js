@@ -8,11 +8,35 @@ const authRoutes = require('./routes/auth');
 const restaurantRoutes = require('./routes/restaurants');
 const orderRoutes = require('./routes/orders');
 const menusRoutes = require("./routes/menus");
+const adminRoutes = require('./routes/admin');
+
 
 // Import sequelize instance pour health-check DB
 const sequelize = require("./db");
 
 const app = express();
+const { User } = require("./models");
+const bcrypt = require("bcrypt");
+
+// Création admin auto si n'existe pas
+(async () => {
+  const adminEmail = "admin@example.com";
+  const adminPassword = "MotDePasseAdmin123";
+
+  const exist = await User.findOne({ where: { email: adminEmail } });
+  if (!exist) {
+    const hashed = await bcrypt.hash(adminPassword, 10);
+    await User.create({
+      name: "Super Admin",
+      email: adminEmail,
+      password: hashed,
+      role: "admin"
+    });
+    console.log("✅ ADMIN CRÉÉ AVEC SUCCÈS SUR RENDER");
+  } else {
+    console.log("ℹ️ Admin déjà existant");
+  }
+})();
 
 // ===== Middlewares =====
 app.use(cors());
@@ -58,6 +82,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/menus', menusRoutes);
+app.use('/api/admin', adminRoutes);
 
 // ===== Route de test =====
 app.get('/test', (req, res) => res.json({ message: '✅ Backend FoodApp fonctionne!' }));

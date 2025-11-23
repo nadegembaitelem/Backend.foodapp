@@ -27,5 +27,7 @@ const authorizeRoles = (...roles) => {
     next();
   };
 };
+// router.use(authenticateToken, authorizeRoles("admin"));
+
 
 module.exports = { authenticateToken, authorizeRoles };

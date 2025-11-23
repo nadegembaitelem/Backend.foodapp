@@ -12,7 +12,7 @@ const adminRoutes = require('./routes/admin');
 
 
 // Import sequelize instance pour health-check DB
-const sequelize = require("./db");
+const sequelize = require("../db");
 
 const app = express();
 const { User } = require("./models");

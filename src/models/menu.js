@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../db");
+const sequelize = require("../../db");
 
 // Modèle Menu — représente les plats/menus proposés par un restaurant
 const Menu = sequelize.define(

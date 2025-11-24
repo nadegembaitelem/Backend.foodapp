@@ -1,5 +1,5 @@
 // models/index.js
-const sequelize = require("../../db");
+const sequelize = require("../db");
 
 const User = require("./user");
 const Restaurant = require("./restaurant");

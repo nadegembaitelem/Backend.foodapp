@@ -1,6 +1,6 @@
 // models/Order.js
 const { DataTypes } = require("sequelize");
-const sequelize = require("../../db"); // ton instance sequelize existante
+const sequelize = require("../db"); // ton instance sequelize existante
 
 const Order = sequelize.define(
   "Order",

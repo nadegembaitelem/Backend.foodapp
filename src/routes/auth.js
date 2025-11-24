@@ -20,13 +20,16 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Cet email est déjà utilisé" });
     }
 
-
+    const userCounter = await User.count();
+    if (userCounter === 0) {
+      console.log("Création du premier utilisateur en tant qu'admin");
+    }
     // Par défaut, le rôle = "client"
     const user = await User.create({
       name,
       email,
       password: password,
-      role: "client",
+      role: userCounter === 0 ? "admin" : "client",
     });
 
     const token = jwt.sign(

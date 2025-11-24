@@ -1,4 +1,4 @@
-const config = require("./src/config");
+const config = require("./config");
 const { Sequelize } = require("sequelize");
 const path = require("path");
 const fs = require("fs");

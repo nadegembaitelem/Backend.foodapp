@@ -94,7 +94,7 @@ app.set('socketio', io);
 await sequelize.sync();
 console.log('✅ Tables synchronisées');
 
-const adminEmail = '[admin@example.com](mailto:admin@example.com)';
+const adminEmail = 'admin@example.com';
 const adminPassword = 'MotDePasseAdmin123';
 
 const exist = await User.findOne({ where: { email: adminEmail } });
@@ -103,7 +103,7 @@ const hashed = await bcrypt.hash(adminPassword, 10);
 await User.create({
 name: 'Super Admin',
 email: adminEmail,
-password: hashed,
+password: adminPassword,
 role: 'admin'
 });
 console.log('✅ ADMIN CRÉÉ AVEC SUCCÈS SUR RENDER');
